@@ -34,6 +34,14 @@ const engine = await CreateExtensionServiceWorkerMLCEngine(
   { initProgressCallback: initProgressCallback }
 );
 
+function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
+
 async function nextWordSuggestion(text) {
   const messages = [
     {
@@ -52,9 +60,12 @@ async function nextWordSuggestion(text) {
 }
 
 function addInputListeners(textArea) {
+  const debouncedRequest = debounce((value) => {
+    requestLLMSuggestions(value, textArea);
+  }, 300);
+
   textArea.addEventListener("input", (e) => {
-    const currentText = e.target.value;
-    requestLLMSuggestions(currentText, textArea);
+    debouncedRequest(e.target.value);
   });
 }
 
