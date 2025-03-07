@@ -30,6 +30,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         path: "sidepanel.html",
         enabled: true,
       });
+      chrome.runtime.sendMessage({ type: "polished_text", text: message.text });
       sendResponse({ success: true });
     })();
     return true;

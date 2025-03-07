@@ -211,9 +211,12 @@ function addPolishExampleShowButton(textArea) {
     button.style.borderRadius = "12px";
     button.addEventListener("click", async () => {
       const currentText = textArea.value;
-      chrome.runtime.sendMessage({ type: "open_side_panel" }, (response) => {
-        console.log("Response from background:", response);
-      });
+      chrome.runtime.sendMessage(
+        { type: "open_side_panel", text: currentText },
+        (response) => {
+          console.log("Response from background:", response);
+        }
+      );
     });
     overlay.appendChild(button);
   }
