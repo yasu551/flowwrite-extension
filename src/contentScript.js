@@ -1,3 +1,5 @@
+import { CreateExtensionServiceWorkerMLCEngine } from "@mlc-ai/web-llm";
+
 document.addEventListener("focusin", (event) => {
   const target = event.target;
   if (
@@ -23,29 +25,43 @@ document.addEventListener("focusout", (event) => {
   }
 });
 
+const initProgressCallback = (report) => {
+  console.log(report);
+};
+
+const engine = await CreateExtensionServiceWorkerMLCEngine(
+  "Qwen2-0.5B-Instruct-q4f16_1-MLC",
+  { initProgressCallback: initProgressCallback }
+);
+
+async function nextWordSuggestion(text) {
+  const messages = [
+    {
+      role: "system",
+      content:
+        "userは入力中のテキストを渡します。そのテキストの次に来るであろう文章を日本語で出力してください。",
+    },
+    { role: "user", content: text },
+  ];
+  const completion = await engine.chat.completions.create({
+    messages,
+  });
+  const { content } = completion.choices[0].message;
+  console.log(content);
+  return content;
+}
+
 function addInputListeners(textArea) {
   textArea.addEventListener("input", (e) => {
     const currentText = e.target.value;
-    // WebLLMに問い合わせる or Web Workerで推論する処理を呼び出す
     requestLLMSuggestions(currentText, textArea);
   });
 }
 
 async function requestLLMSuggestions(currentText, textArea) {
   try {
-    // ここでローカル推論 or 外部APIを呼び出して候補を取得する
-    // 例：外部APIを呼ぶ場合
-    // const response = await fetch('https://YOUR_LLM_SERVER/suggest', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ prompt: currentText })
-    // });
-    // const data = await response.json();
-    // const suggestion = data.suggestion;
-
-    const suggestion = "サンプルの入力候補"; // デモ用のダミーデータ
-
-    showSuggestionOverlay(textArea, suggestion);
+    const content = await nextWordSuggestion(currentText);
+    showSuggestionOverlay(textArea, content);
   } catch (err) {
     console.error("LLM suggestion error:", err);
   }
@@ -220,9 +236,6 @@ document.addEventListener("keydown", async (event) => {
     showPolishPopup(textArea, polished);
   }
 });
-
-
-
 
 async function requestLLMPolish(text) {
   try {

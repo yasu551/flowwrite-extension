@@ -1,5 +1,13 @@
-chrome.runtime.onInstalled.addListener(() => {
-  console.log("FlowWrite installed.");
+import { ExtensionServiceWorkerMLCEngineHandler } from "@mlc-ai/web-llm";
+let handler;
+chrome.runtime.onConnect.addListener(function (port) {
+  console.assert(port.name === "web_llm_service_worker");
+  if (handler === undefined) {
+    handler = new ExtensionServiceWorkerMLCEngineHandler(port);
+  } else {
+    handler.setPort(port);
+  }
+  port.onMessage.addListener(handler.onmessage.bind(handler));
 });
 
 // 必要に応じてonMessageなどを受け取り、API呼び出しの代理など
@@ -12,17 +20,37 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   return true;
 });
 
-chrome.runtime.onMessage.addListener((message, sender) => {
-  // The callback for runtime.onMessage must return falsy if we're not sending a response
-  (async () => {
-    if (message.type === "open_side_panel") {
-      // This will open a tab-specific side panel only on the current tab.
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "open_side_panel") {
+    (async () => {
+      console.log("Opening side panel");
       await chrome.sidePanel.open({ tabId: sender.tab.id });
       await chrome.sidePanel.setOptions({
         tabId: sender.tab.id,
         path: "sidepanel.html",
         enabled: true,
       });
-    }
-  })();
+      sendResponse({ success: true });
+    })();
+    return true; // 非同期応答があることを示す
+  }
 });
+
+// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+//   if (message.type === "chat") {
+//     (async () => {
+//       const messages = [
+//         { role: "system", content: "You are a helpful AI assistant." },
+//         { role: "user", content: "Hello!" },
+//       ];
+//       const reply = await engine.chat.completions.create({
+//         messages,
+//       });
+//       const { content } = reply.choices[0].message;
+//       console.log(answer);
+//       console.log(reply.usage);
+//       sendResponse({ success: true, content });
+//     })();
+//     return true;
+//   }
+// });
