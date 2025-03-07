@@ -1,0 +1,15 @@
+{
+  "name": "flowwrite-extension",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/yasu551/flowwrite-extension.git",
+  "author": "Yasuhiro Sugawara <yasu@sonicgarden.jp>",
+  "license": "MIT",
+  "scripts": {
+    "webpack": "webpack --mode=production"
+  },
+  "devDependencies": {
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
+  }
+}
