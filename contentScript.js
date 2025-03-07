@@ -66,14 +66,75 @@ function showSuggestionOverlay(textArea, suggestion) {
 
   // テキストエリアの位置やサイズを計測
   const rect = textArea.getBoundingClientRect();
-  overlay.style.left = `${rect.left + window.scrollX}px`;
-  overlay.style.top = `${rect.top + window.scrollY}px`;
+  const caretCoordinates = getCaretCoordinates(
+    textArea,
+    textArea.selectionStart
+  );
+  const caretX = rect.left + window.scrollX + caretCoordinates.left;
+  const caretY =
+    rect.top + window.scrollY + caretCoordinates.top + caretCoordinates.height;
+  overlay.style.left = `${caretX}px`;
+  overlay.style.top = `${caretY}px`;
   overlay.style.width = `${rect.width}px`;
   overlay.style.height = `${rect.height}px`;
 
   // 内容の更新
   overlay.textContent = suggestion;
   overlay.style.color = "gray"; // 提示例。視認しやすいように調整
+}
+
+function getCaretCoordinates(element, position) {
+  // ミラー要素を作成（画面に表示しないように隠す）
+  const div = document.createElement("div");
+  const style = window.getComputedStyle(element);
+
+  // ミラー要素の基本スタイル設定
+  div.style.position = "absolute";
+  div.style.visibility = "hidden";
+  div.style.whiteSpace = element.nodeName === "INPUT" ? "pre" : "pre-wrap";
+  div.style.wordWrap = "break-word"; // テキストエリアの場合
+
+  // テキストエリアと同じフォントやパディングなど必要なCSSプロパティをコピー
+  const propertiesToCopy = [
+    "font-family",
+    "font-size",
+    "font-weight",
+    "font-style",
+    "letter-spacing",
+    "text-transform",
+    "word-spacing",
+    "text-indent",
+    "padding",
+    "border",
+    "box-sizing",
+    "line-height",
+  ];
+  propertiesToCopy.forEach((prop) => {
+    div.style[prop] = style.getPropertyValue(prop);
+  });
+
+  // テキストエリアと同じ幅を設定
+  div.style.width = style.width;
+
+  // ミラー要素に、caretまでのテキストを設定
+  div.textContent = element.value.substring(0, position);
+
+  // caret位置のマーカーとして、span要素を追加
+  const span = document.createElement("span");
+  // caretが末尾の場合、spanが空にならないようダミー文字を入れる
+  span.textContent = element.value.substring(position) || ".";
+  div.appendChild(span);
+
+  // ドキュメントに一時的に追加してレンダリングさせ、座標を計測
+  document.body.appendChild(div);
+  const coordinates = {
+    left: span.offsetLeft,
+    top: span.offsetTop,
+    height: span.offsetHeight,
+  };
+  document.body.removeChild(div);
+
+  return coordinates;
 }
 
 function addPolishExampleShowButton(textArea) {
