@@ -32,8 +32,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       });
       sendResponse({ success: true });
     })();
-    return true; // 非同期応答があることを示す
+    return true;
   }
+  return true;
 });
 
 // chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
