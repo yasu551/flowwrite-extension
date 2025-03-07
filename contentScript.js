@@ -7,6 +7,19 @@ document.addEventListener("focusin", (event) => {
   ) {
     // テキスト入力の監視を開始
     addInputListeners(target);
+    addPolishExampleShowButton(target);
+  }
+});
+
+document.addEventListener("focusout", (event) => {
+  const target = event.target;
+  if (
+    target &&
+    (target.nodeName === "TEXTAREA" ||
+      (target.nodeName === "INPUT" && target.type === "text"))
+  ) {
+    // テキスト入力の監視を停止
+    target.removeEventListener("input", addInputListeners);
   }
 });
 
@@ -63,6 +76,49 @@ function showSuggestionOverlay(textArea, suggestion) {
   overlay.style.color = "gray"; // 提示例。視認しやすいように調整
 }
 
+function addPolishExampleShowButton(textArea) {
+  const overlayId = "flowwrite-polish-example-button-overlay";
+  let overlay = document.getElementById(overlayId);
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = overlayId;
+    overlay.style.position = "absolute";
+    overlay.style.zIndex = 9999;
+    document.body.appendChild(overlay);
+  }
+
+  const buttonId = "flowwrite-polish-example-button";
+  let button = document.getElementById(buttonId);
+  if (!button) {
+    button = document.createElement("button");
+    button.id = buttonId;
+    button.textContent = "校正例を表示";
+    button.style.width = "100px";
+    button.style.height = "30px";
+    button.addEventListener("click", async () => {
+      const currentText = textArea.value;
+      const polished = await requestLLMPolish(currentText);
+      showPolishPopup(textArea, polished);
+    });
+    overlay.appendChild(button);
+  }
+
+  // テキストエリアの位置やサイズを計測
+  const rect = textArea.getBoundingClientRect();
+  overlay.style.left = `${rect.left + rect.width - 100}px`;
+  overlay.style.top = `${rect.top + rect.height - 30}px`;
+  // overlay.style.width = `${rect.width}px`;
+  // overlay.style.height = `${rect.height}px`;
+}
+
+function removePolishExampleShowButton(textArea) {
+  const overlayId = "flowwrite-polish-example-button-overlay";
+  let overlay = document.getElementById(overlayId);
+  if (overlay) {
+    overlay.remove();
+  }
+}
+
 document.addEventListener("keydown", (event) => {
   if (event.key === "Tab") {
     const overlay = document.getElementById("flowwrite-suggestion-overlay");
@@ -98,6 +154,9 @@ document.addEventListener("keydown", async (event) => {
     showPolishPopup(textArea, polished);
   }
 });
+
+
+
 
 async function requestLLMPolish(text) {
   try {
@@ -154,3 +213,46 @@ function showPolishPopup(textArea, polishedText) {
 
   document.addEventListener("keydown", listener);
 }
+
+// (function () {
+//   // Create "校正例" button
+//   const correctionButton = document.createElement("button");
+//   correctionButton.innerText = "校正例";
+//   correctionButton.style.position = "fixed";
+//   correctionButton.style.bottom = "20px";
+//   correctionButton.style.right = "20px";
+//   correctionButton.style.zIndex = "10000";
+//   document.body.appendChild(correctionButton);
+
+//   // Open side panel on button click
+//   correctionButton.addEventListener("click", function () {
+//     if (chrome.sidePanel && chrome.sidePanel.setOptions) {
+//       chrome.sidePanel.setOptions(
+//         { panel: { path: "sidepanel.html" } },
+//         function () {
+//           console.log("Side panel opened");
+//         }
+//       );
+//     } else {
+//       console.error("chrome.sidePanel API is not available.");
+//     }
+//   });
+
+//   // Listen for messages from the side panel to append correction text
+//   chrome.runtime.onMessage.addListener(function (
+//     message,
+//     sender,
+//     sendResponse
+//   ) {
+//     if (message.type === "APPEND_TEXT" && message.text) {
+//       // Identify the target textarea on the page (assumed to be the first found)
+//       const targetTextArea = document.querySelector("textarea");
+//       if (targetTextArea) {
+//         targetTextArea.value += message.text;
+//         sendResponse({ success: true });
+//       } else {
+//         sendResponse({ success: false, error: "Target textarea not found." });
+//       }
+//     }
+//   });
+// })();

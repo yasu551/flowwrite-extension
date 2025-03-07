@@ -3,10 +3,7 @@
   "version": "0.1.0",
   "manifest_version": 3,
   "description": "LLMを活用して文章入力補助と可読性向上を行うChrome拡張機能",
-  "permissions": [
-    "activeTab",
-    "scripting"
-  ],
+  "permissions": ["activeTab", "scripting", "sidePanel"],
   "background": {
     "service_worker": "background.js"
   },
@@ -17,9 +14,9 @@
       "run_at": "document_end"
     }
   ],
-  "action": {
-    "default_popup": "popup.html",
-    "default_title": "FlowWrite"
+  "side_panel": {
+    "default_path": "sidepanel.html",
+    "js": ["sidepanel.js"]
   },
   "host_permissions": ["<all_urls>"]
 }
