@@ -162,8 +162,11 @@ function addPolishExampleShowButton(textArea) {
     button.style.borderRadius = "12px";
     button.addEventListener("click", async () => {
       const currentText = textArea.value;
-      const polished = await requestLLMPolish(currentText);
-      showPolishPopup(textArea, polished);
+      // const polished = await requestLLMPolish(currentText);
+      // showPolishPopup(textArea, polished);
+      chrome.runtime.sendMessage({ type: "open_side_panel" }, (response) => {
+        console.log("Response from background:", response);
+      });
     });
     overlay.appendChild(button);
   }
