@@ -95,6 +95,10 @@ function addPolishExampleShowButton(textArea) {
     button.textContent = "校正例を表示";
     button.style.width = "100px";
     button.style.height = "30px";
+    button.style.backgroundColor = "#007bff";
+    button.style.color = "#fff";
+    button.style.border = "none";
+    button.style.borderRadius = "12px";
     button.addEventListener("click", async () => {
       const currentText = textArea.value;
       const polished = await requestLLMPolish(currentText);
@@ -105,10 +109,8 @@ function addPolishExampleShowButton(textArea) {
 
   // テキストエリアの位置やサイズを計測
   const rect = textArea.getBoundingClientRect();
-  overlay.style.left = `${rect.left + rect.width - 100}px`;
-  overlay.style.top = `${rect.top + rect.height - 30}px`;
-  // overlay.style.width = `${rect.width}px`;
-  // overlay.style.height = `${rect.height}px`;
+  overlay.style.left = `${rect.left + rect.width - 110}px`;
+  overlay.style.top = `${rect.top + rect.height - 35}px`;
 }
 
 function removePolishExampleShowButton(textArea) {
