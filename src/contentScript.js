@@ -47,9 +47,31 @@ async function nextWordSuggestion(text) {
     {
       role: "system",
       content:
-        "userは入力中のテキストを渡します。そのテキストの次に来るであろう文章を日本語で出力してください。",
+        "あなたは、ユーザーが入力している途中のテキストをもとに、次に入力される可能性が高いテキストを予測して表示するツールの一部です。ユーザーの入力を自然かつ的確に補完するテキストを生成してください。",
     },
-    { role: "user", content: text },
+    {
+      role: "user",
+      content:
+        "以下のテキストに続いて入力される可能性が高いテキストを、自然に補完してください。\n\n入力中のテキスト:\n人工知能の発展により、社会は",
+    },
+    {
+      role: "assistant",
+      content:
+        "ますます自動化が進み、さまざまな分野で生産性が向上することが期待されています。",
+    },
+    {
+      role: "user",
+      content: "入力中のテキスト:\nクラウドコンピューティングの普及によって",
+    },
+    {
+      role: "assistant",
+      content:
+        "企業のITインフラが柔軟になり、コスト削減やスケーラビリティの向上が実現されました。",
+    },
+    {
+      role: "user",
+      content: `入力中のテキスト: ${text}`,
+    },
   ];
   const completion = await engine.chat.completions.create({
     messages,
